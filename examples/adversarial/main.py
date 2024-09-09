@@ -4,9 +4,9 @@ import pickle
 import gc
 
 from datasets import build_dataset
-from .model.models import get_architecture
-from .cfgs import cfg
-from .utils import set_seed, Smooth_Adv_ImageNet, calculate_accuracy_smooth
+from examples.adversarial.model.models import get_architecture
+from examples.adversarial.cfgs import cfg
+from examples.adversarial.utils import set_seed, Smooth_Adv_ImageNet, calculate_accuracy_smooth
 
 # images per batch
 GPU_CAPACITY = 256
