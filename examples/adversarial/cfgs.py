@@ -11,6 +11,6 @@ cfg = {
     "num_of_classes": {"value": 10, "help": "number of classes"},
     "min_pixel_value": {"value": 0.0, "help": "minimum pixel value"},
     "max_pixel_value": {"value": 1.0, "help": "maximum pixel value"},
-    "directory": {"value": "adversarial_examples", "help": "directory to store adversarial examples and noises"},
+    "directory": {"value": "examples/adversarial/adversarial_examples", "help": "directory to store adversarial examples and noises"},
 
 }
