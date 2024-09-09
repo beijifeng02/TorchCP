@@ -10,7 +10,7 @@ from scipy.stats.mstats import mquantiles
 import warnings
 import math
 
-from .attacks import PGD_L2, DDN
+from attacks import PGD_L2, DDN
 
 
 def set_seed(seed):
