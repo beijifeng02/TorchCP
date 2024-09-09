@@ -1,4 +1,4 @@
-from resnet import resnet as resnet_cifar
+from .resnet import resnet as resnet_cifar
 import torch
 import torch.backends.cudnn as cudnn
 from torchvision.models.resnet import resnet50
