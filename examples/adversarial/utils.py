@@ -46,6 +46,20 @@ def Smooth_Adv_ImageNet(model, dataloader, indices, n_smooth, sigma_smooth, N_st
             tmp = torch.zeros((len(tmp_labels) * num_of_noise_vecs, *tmp_x.shape[1:]))
             x_tmp = tmp_x.repeat((1, num_of_noise_vecs, 1, 1)).view(tmp.shape).to(device)
             noise = torch.empty((n * n_smooth, channels, rows, cols))
+            image_index = -1
+            for k in range(n):
+                image_index = image_index + 1
+                torch.manual_seed(indices[image_index])
+                noise[(k * n_smooth):((k + 1) * n_smooth)] = torch.randn(
+                    (n_smooth, channels, rows, cols)) * sigma_smooth
+
+            noise = noise.to(device)
+            tmp_x_attack = attacker.attack(model, x_tmp, tmp_labels.long(),
+                                      noise=noise, num_noise_vectors=num_of_noise_vecs,
+                                      no_grad=False,
+                                      )
+            tmp_x_attack = tmp_x_attack[::num_of_noise_vecs]
+
 
 
 def calculate_accuracy_smooth(model, x, y, noises, num_classes, k=1, device='cpu', GPU_CAPACITY=1024):
