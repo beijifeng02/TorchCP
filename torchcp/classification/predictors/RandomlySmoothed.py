@@ -7,6 +7,7 @@
 import warnings
 import math
 import torch
+from tqdm import tqdm
 
 from torchcp.classification.predictors.base import BasePredictor
 from torchcp.utils.common import calculate_conformal_value
@@ -44,15 +45,26 @@ class RandomlySmoothedPredictor(BasePredictor):
             labels = torch.cat(labels_list)
         self.calculate_threshold(logits, labels, alpha)
 
-    def smooth(self, x):
+    def smooth(self, x, labels=None):
         n = x.size()[0]
         rows = x.size()[2]
         cols = x.size()[3]
         channels = x.size()[1]
 
         uniform_variables = torch.rand(n)
-        for j in range(n):
-
+        for i in tqdm(range(n)):
+            tmp_x = x[i]
+            if labels is not None:
+                tmp_label = labels[i]
+            noises_test = torch.randn((self.n_smooth, channels, rows, cols)) * self.sigma_smooth
+            tmp = torch.zeros((tmp_x.size()[0] * self.n_smooth, *tmp_x.shape[1:]))
+            x_tmp = tmp_x.repeat((1, self.n_smooth, 1, 1)).view(tmp.shape).to(self._device)
+            noisy_points = x_tmp + noises_test.to(self._device)
+            with torch.no_grad():
+                noisy_outputs = self._logits_transformation(self._model(noisy_points)).detach()
+            labels = torch.ones(self.n_smooth) * tmp_label
+            labels = labels.to(self._device)
+            noisy_scores = self.score_function(noisy_outputs, labels)
 
 
     def calculate_threshold(self, logits, labels, alpha):
