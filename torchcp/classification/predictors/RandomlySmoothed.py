@@ -21,9 +21,11 @@ class RandomlySmoothedPredictor(BasePredictor):
     :param temperature: the temperature of Temperature Scaling.
     """
 
-    def __init__(self, score_function, model=None, temperature=1, sigma_smooth=0.25):
+    def __init__(self, score_function, model=None, temperature=1, sigma_smooth=0.25, n_test=10000, n_smooth=256):
         super().__init__(score_function, model, temperature)
         self.sigma_smooth = sigma_smooth
+        self.n_test = n_test
+        self.n_smooth = n_smooth
 
     #############################
     # The calibration process
@@ -41,6 +43,16 @@ class RandomlySmoothedPredictor(BasePredictor):
             logits = torch.cat(logits_list).float()
             labels = torch.cat(labels_list)
         self.calculate_threshold(logits, labels, alpha)
+
+    def smooth(self, x):
+        n = x.size()[0]
+        rows = x.size()[2]
+        cols = x.size()[3]
+        channels = x.size()[1]
+
+        uniform_variables = torch.rand(n)
+        for j in range(n):
+
 
     def calculate_threshold(self, logits, labels, alpha):
         logits = logits.to(self._device)
