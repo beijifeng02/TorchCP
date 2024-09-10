@@ -25,7 +25,7 @@ def set_seed(seed):
     return seed
 
 
-def Smooth_Adv_ImageNet(model, dataloader, indices, n_smooth, sigma_smooth, N_steps=20, max_norm=0.125, device='cpu',
+def Smooth_Adv_ImageNet(model, x, y, indices, n_smooth, sigma_smooth, N_steps=20, max_norm=0.125, device='cpu',
                         GPU_CAPACITY=1024, method='PGD'):
     # create attack model
     if method == 'PGD':
