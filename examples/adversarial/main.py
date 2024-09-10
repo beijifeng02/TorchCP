@@ -10,7 +10,7 @@ from cfgs import cfg
 from utils import set_seed, Smooth_Adv_ImageNet, calculate_accuracy_smooth, get_dimension
 
 # images per batch
-GPU_CAPACITY = 256
+GPU_CAPACITY = 512
 
 sigma_smooth = cfg["ratio"]["value"] * cfg["epsilon"]["value"]
 correction = float(cfg["epsilon"]["value"]) / float(sigma_smooth)
