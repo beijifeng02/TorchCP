@@ -25,7 +25,7 @@ def set_seed(seed):
     return seed
 
 
-def Smooth_Adv_ImageNet(model, x, y, indices, n_smooth, sigma_smooth, N_steps=20, max_norm=0.125, device='cpu',
+def Smooth_Adv_ImageNet(model, dataloader, indices, n_smooth, sigma_smooth, N_steps=20, max_norm=0.125, device='cpu',
                         GPU_CAPACITY=1024, method='PGD'):
     # create attack model
     if method == 'PGD':
@@ -33,82 +33,9 @@ def Smooth_Adv_ImageNet(model, x, y, indices, n_smooth, sigma_smooth, N_steps=20
     elif method == "DDN":
         attacker = DDN(steps=N_steps, device=device, max_norm=max_norm)
 
-    # create container for the adversarial examples
-    x_adv = torch.zeros_like(x)
-
-    # get number of data points
-    n = x.size()[0]
-
-    # get dimension of data
-    rows = x.size()[2]
-    cols = x.size()[3]
-    channels = x.size()[1]
-
-    # number of permutations to estimate mean
-    num_of_noise_vecs = n_smooth
-
-    # calculate maximum batch size according to gpu capacity
-    batch_size = GPU_CAPACITY // num_of_noise_vecs
-
-    # calculate number of batches
-    if n % batch_size != 0:
-        num_of_batches = (n // batch_size) + 1
-    else:
-        num_of_batches = (n // batch_size)
-
-    # start generating examples for each batch
-    print("Generating Adverserial Examples:")
-
-    image_index = -1
-    for j in tqdm(range(num_of_batches)):
-        #GPUtil.showUtilization()
-        # get inputs and labels of batch
-        inputs = x[(j * batch_size):((j + 1) * batch_size)]
-        labels = y[(j * batch_size):((j + 1) * batch_size)]
-        curr_batch_size = inputs.size()[0]
-
-        # duplicate batch according to the number of added noises and send to device
-        # the first num_of_noise_vecs samples will be duplicates of x[0] and etc.
-        tmp = torch.zeros((len(labels) * num_of_noise_vecs, *inputs.shape[1:]))
-        x_tmp = inputs.repeat((1, num_of_noise_vecs, 1, 1)).view(tmp.shape).to(device)
-
-        # send labels to device
-        y_tmp = labels.to(device).long()
-
-        # generate random Gaussian noise for the duplicated batch
-        noise = torch.empty((curr_batch_size * n_smooth, channels, rows, cols))
-        # get relevant noises for this batch
-        for k in range(curr_batch_size):
-            image_index = image_index + 1
-            torch.manual_seed(indices[image_index])
-            noise[(k * n_smooth):((k + 1) * n_smooth)] = torch.randn(
-                (n_smooth, channels, rows, cols)) * sigma_smooth
-
-
-        #noise = noises[(j * (batch_size * num_of_noise_vecs)):((j + 1) * (batch_size * num_of_noise_vecs))].to(device)
-        # noise = torch.randn_like(x_tmp, device=device) * sigma_adv
-
-        noise = noise.to(device)
-        # generate adversarial examples for the batch
-        x_adv_batch = attacker.attack(model, x_tmp, y_tmp,
-                                      noise=noise, num_noise_vectors=num_of_noise_vecs,
-                                      no_grad=False,
-                                      )
-
-        # take only the one example for each point
-        x_adv_batch = x_adv_batch[::num_of_noise_vecs]
-
-        # move back to CPU
-        x_adv_batch = x_adv_batch.to(torch.device('cpu'))
-
-        # put in the container
-        x_adv[(j * batch_size):((j + 1) * batch_size)] = x_adv_batch.detach().clone()
-
-        del noise, tmp, x_adv_batch
-        gc.collect()
-
-    # return adversarial examples
-    return x_adv
+    with torch.no_grad():
+        for examples in dataloader:
+            tmp_x, tmp_labels = examples[0], examples[1]
 
 
 def calculate_accuracy_smooth(model, x, y, noises, num_classes, k=1, device='cpu', GPU_CAPACITY=1024):
@@ -224,3 +151,12 @@ def calculate_conformal_value(scores, alpha, default_q_hat=torch.inf):
         return default_q_hat
 
     return torch.quantile(scores, qunatile_value, dim=0).to(scores.device)
+
+
+def get_dimension(dataloader):
+    examples = enumerate(dataloader)
+    batch_idx, (x_test, y_test) = next(examples)
+    rows = x_test.size()[2]
+    cols = x_test.size()[3]
+    channels = x_test.size()[1]
+    return rows, cols, channels

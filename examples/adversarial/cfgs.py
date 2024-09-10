@@ -1,7 +1,6 @@
 cfg = {
     "alpha": {"value": 0.1, "help": "error rate for conformal prediction"},
     "epsilon": {"value": 0.125, "help": "L2 bound on the adversarial noise"},
-    "n_experiments": {"value": 50, "help": "number of experiments to estimate coverage"},
     "ratio": {"value": 2, "help": "ratio between adversarial noise bound to smoothed noise"},
     "n_smooth": {"value": 256, "help": "number of samples used for smoothing"},
     "N_steps": {"value": 20, "help": "number of gradiant steps for PGD attack"},

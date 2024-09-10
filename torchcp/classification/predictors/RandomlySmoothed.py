@@ -21,8 +21,9 @@ class RandomlySmoothedPredictor(BasePredictor):
     :param temperature: the temperature of Temperature Scaling.
     """
 
-    def __init__(self, score_function, model=None, temperature=1):
+    def __init__(self, score_function, model=None, temperature=1, sigma_smooth=0.25):
         super().__init__(score_function, model, temperature)
+        self.sigma_smooth = sigma_smooth
 
     #############################
     # The calibration process

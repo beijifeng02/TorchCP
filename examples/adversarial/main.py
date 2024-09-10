@@ -2,11 +2,12 @@ import os
 import torch
 import pickle
 import gc
+from sklearn.model_selection import train_test_split
 
 from datasets import build_dataset
 from model.models import get_architecture
 from cfgs import cfg
-from utils import set_seed, Smooth_Adv_ImageNet, calculate_accuracy_smooth
+from utils import set_seed, Smooth_Adv_ImageNet, calculate_accuracy_smooth, get_dimension
 
 # images per batch
 GPU_CAPACITY = 256
@@ -16,7 +17,7 @@ correction = float(cfg["epsilon"]["value"]) / float(sigma_smooth)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 set_seed(0)
-trainloader, testloader = build_dataset(batch_size=GPU_CAPACITY)
+calibloader, testloader = build_dataset(batch_size=GPU_CAPACITY)
 checkpoint = torch.load('examples/adversarial/pretrained_model/checkpoint.pth.tar', map_location=device)
 model = get_architecture(checkpoint["arch"], "cifar10")
 model.to(device)
@@ -63,4 +64,5 @@ print("True Model accuracy on adversarial examples :" + str(adv_acc * 100) + "%"
 del noises_base
 gc.collect()
 
+idx1, idx2 = train_test_split(indices, test_size=0.5)
 
