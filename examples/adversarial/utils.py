@@ -107,8 +107,7 @@ def Smooth_Adv_ImageNet(model, x, y, indices, n_smooth, sigma_smooth, N_steps=20
         del noise, tmp, x_adv_batch
         gc.collect()
 
-        split_x_adv = torch.split(x_adv, GPU_CAPACITY)
-        testloader = TensorDataset(torch.stack(split_x_adv), labels)
+    testloader = TensorDataset(x_adv, y)
 
     # return adversarial examples
     return testloader

@@ -54,6 +54,7 @@ class RandomlySmoothedPredictor(BasePredictor):
         for j in range(n):
 
 
+
     def calculate_threshold(self, logits, labels, alpha):
         logits = logits.to(self._device)
         labels = labels.to(self._device)
