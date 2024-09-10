@@ -32,7 +32,7 @@ rows = x_test.size()[2]
 cols = x_test.size()[3]
 channels = x_test.size()[1]
 
-x_test_adv = Smooth_Adv_ImageNet(model, testloader, x_test, y_test, cfg["n_smooth"]["value"], sigma_smooth,
+x_test_adv = Smooth_Adv_ImageNet(model, x_test, y_test, indices, cfg["n_smooth"]["value"], sigma_smooth,
                     cfg["N_steps"]["value"], cfg["epsilon"]["value"], device, GPU_CAPACITY=GPU_CAPACITY)
 x_test_adv_base = Smooth_Adv_ImageNet(model, x_test, y_test, indices, 1, sigma_smooth,
                     cfg["N_steps"]["value"], cfg["epsilon"]["value"], device, GPU_CAPACITY=GPU_CAPACITY)
