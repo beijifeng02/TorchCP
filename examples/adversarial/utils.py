@@ -35,7 +35,17 @@ def Smooth_Adv_ImageNet(model, dataloader, indices, n_smooth, sigma_smooth, N_st
 
     with torch.no_grad():
         for examples in dataloader:
-            tmp_x, tmp_labels = examples[0], examples[1]
+            tmp_x, tmp_labels = examples[0].to(device), examples[1].to(device)
+            n = tmp_x.shape[0]
+            rows = tmp_x.shape[2]
+            cols = tmp_x.shape[3]
+            channels = tmp_x.shape[1]
+
+            # number of permutations to estimate mean
+            num_of_noise_vecs = n_smooth
+            tmp = torch.zeros((len(tmp_labels) * num_of_noise_vecs, *tmp_x.shape[1:]))
+            x_tmp = tmp_x.repeat((1, num_of_noise_vecs, 1, 1)).view(tmp.shape).to(device)
+            noise = torch.empty((n * n_smooth, channels, rows, cols))
 
 
 def calculate_accuracy_smooth(model, x, y, noises, num_classes, k=1, device='cpu', GPU_CAPACITY=1024):
